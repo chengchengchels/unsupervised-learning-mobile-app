@@ -1,0 +1,406 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Mar 24 20:43:40 2019
+
+@author: chengcheng
+"""
+
+
+
+'''K-means clustering'''
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+ds=pd.read_excel('final.xlsx')
+
+ds.columns
+for col in ds:
+    print(col)
+    
+pd.set_option('display.expand_frame_repr', False)
+
+ds.head()
+
+ds.shape
+
+ds.describe().round(2)
+
+dc=ds.corr().round(2)
+
+ds.info()
+
+dc.to_excel('corr_.xlsx')
+                                        
+                                                                                                    
+X=ds.drop(['q1',
+'q11',
+'q12',
+'q2r1',
+'q2r2',
+'q2r3',
+'q2r4',
+'q2r5',
+'q2r6',
+'q2r7',
+'q2r8',
+'q2r9',
+'q2r10',
+'q4r1',
+'q4r2',
+'q4r3',
+'q4r4',
+'q4r5',
+'q4r6',
+'q4r7',
+'q4r8',
+'q4r9',
+'q4r10',
+'q4r11',
+'q48',
+'q49',
+'q50r1',
+'q50r2',
+'q50r3',
+'q50r4',
+'q50r5',
+'q54',
+'q55',
+'q56',
+'q57'],axis=1) #remove demographic information
+   
+    
+dc_x=X.corr().round(2)    
+
+##  THE landscape   #####
+fig, ax = plt.subplots(figsize=(12,8))
+ 
+#number of app owned  
+plt.subplot(2, 2, 1)
+sns.distplot(a = ds['q11'],
+             hist = True,
+             kde = True,
+             color = 'blue')
+
+#age   
+plt.subplot(2, 2, 2)
+sns.distplot(a = ds['q1'],
+             hist = True,
+             kde = True,
+             color = 'blue')
+
+ #paid or free  
+plt.subplot(2, 2, 3)
+sns.distplot(a = ds['q12'],
+             hist = True,
+             kde = True,
+             color = 'blue')
+
+#education 
+plt.subplot(2, 2, 4)
+sns.distplot(a = ds['q48'],
+             hist = True,
+             kde = True,
+             color = 'blue')
+
+plt.show()
+
+
+fig, ax = plt.subplots(figsize=(12,8))
+#martial status
+plt.subplot(2, 3, 1)
+sns.distplot(a = ds['q49'],
+             hist = True,
+             kde = True,
+             color = 'blue')
+
+#race
+plt.subplot(2, 3, 2)
+sns.distplot(a = ds['q54'],
+             hist = True,
+             kde = True,
+             color = 'blue')
+
+#hispanic/latino ethnicity
+plt.subplot(2, 3, 3)
+sns.distplot(a = ds['q55'],
+             hist = True,
+             kde = True,
+             color = 'blue')
+
+#annual income
+plt.subplot(2, 3, 4)
+sns.distplot(a = ds['q56'],
+             hist = True,
+             kde = True,
+             color = 'blue')
+#gender
+plt.subplot(2, 3, 5)
+sns.distplot(a = ds['q57'],
+             hist = True,
+             kde = True,
+             color = 'blue')
+
+plt.show()
+
+
+
+######   PCA    ########
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+import matplotlib.pyplot as plt
+
+scaler = StandardScaler()
+
+scaler.fit(X)
+
+X_scaled = scaler.transform(X)
+
+X_scaled_df = pd.DataFrame(X_scaled)
+
+print(pd.np.var(X))
+print(pd.np.var(X_scaled_df))
+
+
+pca=PCA(n_components = None,
+                           random_state = 508)
+
+pca.fit(X_scaled)
+
+# Plot the explained variances
+features = range(pca.n_components_)
+plt.bar(features, pca.explained_variance_)
+plt.xlabel('PCA feature')
+plt.ylabel('variance')
+plt.xticks(features)
+plt.show()
+'''
+Since PCA features 0 to 4 have significant variance, 
+the intrinsic dimension of this dataset appears to be 5:
+'''
+
+      
+x_pca_reduced = PCA(n_components = 5,
+                           random_state = 508)
+
+x_pca_reduced.fit(X_scaled)
+
+r_pca_reduced = x_pca_reduced.transform(X_scaled)
+
+factor_loadings_df = pd.DataFrame(pd.np.transpose(x_pca_reduced.components_))
+
+factor_loadings_df = factor_loadings_df.set_index(X.columns[0:])
+
+print(factor_loadings_df)
+
+factor_loadings_df.to_excel('final_factor_loadings.xlsx')
+
+
+
+'''
+from the factor loading results we can see the some principal traits
+ within our survey repondents in that :
+    -their preference with those seemingly outdated websites such as MySpace 
+AOL Radio; their incline to follow the trend;
+    -their interests in follow the film&entertainment on website like IMDB;
+    -their likelihood to try new stuff;
+    -their degree of comform with acceptance of new technology or to try new 
+gadgets/appliances together with too much information to digest and too many
+options to choose from.
+
+In this regard, I suggest a new app to tailor the needs while making things easier
+for the majority that displays well-sorted trending high-quality information 
+covering only the limited popular topics in technology and entertainment, in
+a clean and simple manner.
+
+'''
+
+
+######  KMeans: to cluster potential customers ########
+from sklearn.cluster import KMeans
+
+ks = range(1, 10)
+inertias = []
+
+for k in ks:
+    # Create a KMeans instance with k clusters: model
+    model=KMeans(n_clusters=k)    
+    # Fit model to samples
+    model.fit(X)    
+    # Append the inertia to the list of inertias
+    inertias.append(model.inertia_)
+           
+# Plot ks vs inertias
+plt.plot(ks, inertias, '-o')
+plt.xlabel('number of clusters, k')
+plt.ylabel('inertia')
+plt.xticks(ks)
+plt.show()
+#pick 3 as k:
+model= KMeans(n_clusters=3)
+
+model.fit(X)
+
+labels=model.predict(X)
+
+model_clusters = pd.DataFrame({'cluster': model.labels_})
+
+print(model_clusters.iloc[: , 0].value_counts())
+
+print(labels)
+
+print(model.inertia_)
+
+centroids_m = model.cluster_centers_
+
+centroids_m_df = pd.DataFrame(centroids_m)
+
+centroids_m_df.columns = X.columns[0:len(X.columns)]
+
+centroids_m_df.to_excel('final_model_centriods.xlsx')
+
+'''
+From the firat rough look into this dataset, we can see respondents can be 
+realatively evenly grouped into 3 clusters, with 'cluster 0(C0)' having about 
+25% more people, from this perspective alone, their app-using related behavior
+and potential needs could be analyzed in the purpose of designing an new App.
+'''
+
+
+'''
+from the cluster results we can see that:
+-facebook and youtube are the most popular 2 websites that all 
+cluster respondents visit;
+-myspace,vevo,AOL radio and Last.fm are websites that all cluster respondents 
+rarely visit, which can be explanied by the fact they are outdated, or favored by
+the minor group of people, the purpose why they still are visiting these websites
+will be interesting to know...
+-compared with the other two clusters, 'cluster 0(C0)' tend to visit Yahoo Entertainment and Music
+less often, while 'cluster 2(C2)' tend to vist Linkedin a lit bit more often. 
+These minor differences in behavior trait are worth attention
+'''
+
+
+'''
+while examining question 24, we can find that:
+all clusters tend to care not much about keeping up with technological 
+developments, they all are certain that people often ask for their advice when looking to buy
+technology or electronic products; particularly, C0 cluster are music lover, 
+TV series binge-watcher, facebook supporter--a profile very close to that of the
+'Internet Generation': they seem to enjoy virtual or mental world and time alone,
+not wanting to be involved too much in real-life social interaction.
+'''
+
+
+'''
+In terms of question 25, respondents are not showing much extreme attitute to any questions,
+while they all show initiativeness and open-mind to some extent.
+'''
+
+
+'''
+for the last behaviral question,comparably, C0 show slightly lower tendency to be 
+attracted by luxury brands,and that children have little impact on their 
+App downloaded could be due to the fact they are young and have no children, meanwhil,
+they are less of the impluse buyer and show cautious attitude towards spending money--
+while targeting this group of people, meeting their key needs could encourage them
+to spend money as they would find practical rationale behind the purchase.
+Also, compared with the other clusters, C0 shows slightly higher emphasis on the 
+quality of an app,and slightly higher tendency to show off a good new app, which 
+indicate that this group of customer could bring more 'socail effects' than 
+the other clusters.
+
+while C1 show slightly higher interests in online shopping, package deals, and 
+discounts more than the other clusters. 
+''''
+
+### Combine KMeans & PCA #######
+
+x_pr = x_pca_reduced.transform(X_scaled)
+
+
+X_pca_df = pd.DataFrame(x_pr)
+
+
+X_pca_df.columns = ['average joe','tv follower', 'info beliver', 'trend leader',
+                    'trend follower']
+
+
+#Reattach demographic information 
+final_pca_df = pd.concat([ds.loc[ : ,['q11','q12','q57',
+                                       'q1',
+'q13r1',
+'q13r2',
+'q13r3',
+'q13r4',
+'q13r5',
+'q13r6',
+'q13r7',
+'q13r8',
+'q13r9',
+'q13r10',
+'q13r11',
+'q13r12',
+'q48',
+'q49',
+'q50r1',
+'q50r2',
+'q50r3',
+'q50r4',
+'q50r5',
+'q54',
+'q55',
+'q56']] , X_pca_df], axis = 1)
+
+# Analyzing by demo-columns
+fig, ax = plt.subplots(figsize = (8, 4))
+sns.boxplot(x = 'q12',
+            y =  'trend follower',
+            data = final_pca_df)
+
+plt.ylim(-2, 4)
+plt.tight_layout()
+plt.show()
+
+#this action can be done in the same way on the other demographic columns!
+#(which is not fully displayed here in the interest of time and energy!)
+
+
+# Analyze cluster memberships
+final_cls = pd.concat([model_clusters,
+                         final_pca_df],
+                         axis = 1)
+
+
+fig, ax = plt.subplots(figsize = (8, 4))
+sns.boxplot(x = 'q56',
+            y = 'trend follower',
+            hue = 'cluster',
+            data = final_cls)
+
+plt.show()
+
+# Renaming gender
+Gender = {1 : 'Male',
+          2 : 'Female'}
+
+
+final_cls['q57'].replace(Gender, inplace = True)
+
+#this action can be done in the same way on the other demographic columns!
+#(which is not fully displayed here in the interest of time and energy!)
+
+final_cls.to_excel('final_combo_cc.xlsx')
+
+
+
+
+
+
+
+
+
+
