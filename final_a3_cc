@@ -211,9 +211,8 @@ AOL Radio; their incline to follow the trend;
 gadgets/appliances together with too much information to digest and too many
 options to choose from.
 
-In this regard, I suggest a new app to tailor the needs while making things easier
-for the majority that displays well-sorted trending high-quality information 
-covering only the limited popular topics in technology and entertainment, in
+In this regard, I suggest a new app to tailor the needs of the majority while making things easier for them, 
+displaying well-sorted trending high-quality information that covers only the limited popular topics on technology and entertainment, in
 a clean and simple manner.
 
 '''
@@ -263,7 +262,7 @@ centroids_m_df.columns = X.columns[0:len(X.columns)]
 centroids_m_df.to_excel('final_model_centriods.xlsx')
 
 '''
-From the firat rough look into this dataset, we can see respondents can be 
+At the first rough look into this dataset, we can see respondents can be 
 realatively evenly grouped into 3 clusters, with 'cluster 0(C0)' having about 
 25% more people, from this perspective alone, their app-using related behavior
 and potential needs could be analyzed in the purpose of designing an new App.
@@ -365,9 +364,6 @@ plt.ylim(-2, 4)
 plt.tight_layout()
 plt.show()
 
-#this action can be done in the same way on the other demographic columns!
-#(which is not fully displayed here in the interest of time and energy!)
-
 
 # Analyze cluster memberships
 final_cls = pd.concat([model_clusters,
@@ -383,15 +379,12 @@ sns.boxplot(x = 'q56',
 
 plt.show()
 
-# Renaming gender
+# Renaming gender:(this can be applied in the similar way to the other demographic columns)
 Gender = {1 : 'Male',
           2 : 'Female'}
 
-
 final_cls['q57'].replace(Gender, inplace = True)
 
-#this action can be done in the same way on the other demographic columns!
-#(which is not fully displayed here in the interest of time and energy!)
 
 final_cls.to_excel('final_combo_cc.xlsx')
 
