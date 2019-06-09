@@ -7,7 +7,7 @@ Exploratory data analysis is conducted for the general outlook of the US mobile 
 
 ### Market Need:
 
-Based on the factor loading results, a new app is suggested that displays well-sorted trending high-quality information covering only the limited popular topics in technology and entertainment, in a clean and simple manner to tailor the needs of while making things easier for the majority.
+Based on the factor loading results, a new app can be suggested to display well-sorted trending high-quality information covering only the limited popular topics in technology and entertainment, in a clean and simple manner to tailor the needs of while making things easier for the majority.
   
 
-(this analysis is not complete, more work remain to be done in respect of market targeting strategy.)
+(this analysis is not complete, more work remains to be done in respect of market targeting strategy.)
